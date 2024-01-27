@@ -1,0 +1,65 @@
+name: CI Lambda Rewrite Tests
+
+on: pull_request
+
+jobs:
+  terraform-localstack:
+    name: "CI: LocalStack Lambda Rewrite Tests"
+    runs-on: ubuntu-latest
+    env:
+      DEFAULT_REGION: us-east-1
+      AWS_ACCOUNT_ID: "000000000000"
+      AWS_ACCESS_KEY_ID: dummy-access-key
+      AWS_SECRET_ACCESS_KEY: dummy-secret-key
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Install terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6.6
+
+      - name: Setup node.js 20.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install zip if using nektos/act
+        run: apt-get update && apt-get install -y zip
+        if: ${{ env.ACT }}
+
+      - name: Install python
+        uses: actions/setup-python@v4
+        with:
+         python-version: '3.11'
+
+      - name: Install python modules
+        run: pip install -r ./localstack/requirements.txt
+
+      - name: Install docker-compose if using nektos/act
+        run: |
+          sudo curl -L https://github.com/docker/compose/releases/download/v2.6.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+        if: ${{ env.ACT }}
+
+      - name: Start LocalStack
+        working-directory: ./localstack
+        run: docker-compose up -d
+
+      - name: Run rewrite tests
+        working-directory: ./localstack
+        run: ./run_lambda_test.sh
+
+      - name: Report test results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: localstack/testing_output/*.xml
+          report_individual_runs: "true"
+
+      - name: Stop LocalStack
+        working-directory: ./localstack
+        run: docker-compose down
+        if: always()

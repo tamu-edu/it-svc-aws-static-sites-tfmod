@@ -1,0 +1,7 @@
+localstack/venv
+localstack/testing_dir
+localstack/testing_output
+**/.terraform
+**/sm-key*
+.DS_Store
+*.zip

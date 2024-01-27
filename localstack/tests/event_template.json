@@ -1,0 +1,49 @@
+{
+    "Records": [
+      {
+        "cf": {
+          "request": {
+            "headers": {
+              "host": [
+                {
+                  "value": "{{ host }}",
+                  "key": "Host"
+                }
+              ],
+              "user-agent": [
+                {
+                  "value": "test-agent",
+                  "key": "User-Agent"
+                }
+              ]
+            },
+            "origin": {
+              "custom": {
+                "customHeaders": {
+                  "rules-url": [
+                    {
+                      "value": "{{ rules_url }}",
+                      "key": "Rules-URL"
+                    }
+                  ],
+                  "rules-cache-timeout": [
+                    {
+                      "value": "600",
+                      "key": "{{ rules_cache_timeout }}"
+                    }
+                  ]
+                }
+              }
+            },
+            "clientIp": "2001:cdba::3257:9652",
+            "uri": "{{ uri }}",
+            "method": "GET"
+          },
+          "config": {
+            "distributionId": "EXAMPLE"
+          }
+        }
+      }
+    ]
+  }
+  

@@ -1,0 +1,7 @@
+awscli-local[ver1]
+deepdiff
+jinja2
+junit-xml
+localstack
+PyYAML
+terraform-local

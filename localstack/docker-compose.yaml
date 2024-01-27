@@ -1,0 +1,16 @@
+
+version: '3.1'
+
+services:
+  localstack:
+    container_name: "${LOCALSTACK_DOCKER_NAME-localstack_main}"
+    image: localstack/localstack
+    network_mode: bridge
+    environment:
+      - SERVICES=iam,cloudwatch,cloudwatch-logs,lambda,ec2,sts
+      - LAMBDA_EXECUTOR=docker-reuse
+    ports:
+      - "4566:4566"
+    volumes:
+      - "${TMPDIR:-/tmp/localstack}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
