@@ -689,8 +689,8 @@ resource "aws_cloudfront_distribution" "site" {
 
 
 resource "aws_cloudfront_response_headers_policy" "site" {
-  name    = "site-headers-policy-${var.deployment}"
-  comment = "Site Headers Policy (${var.deployment})"
+  name    = "site-headers-policy-${replace(var.site_settings.top_level_domain, ".", "_")}-${var.deployment}"
+  comment = "Site Headers Policy (${var.site_settings.top_level_domain}-${var.deployment})"
 
   security_headers_config {
     content_type_options {
@@ -741,8 +741,8 @@ resource "aws_cloudfront_response_headers_policy" "site" {
 }
 
 resource "aws_cloudfront_origin_access_control" "site" {
-  name                              = "site-origin-access-control-${var.deployment}"
-  description                       = "Site Policy (${var.deployment}))"
+  name                              = "site-origin-access-control-${replace(var.site_settings.top_level_domain, ".", "-")}-${var.deployment}"
+  description                       = "Site Policy (${var.site_settings.top_level_domain}-${var.deployment}))"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
