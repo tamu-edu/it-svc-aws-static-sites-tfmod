@@ -4,7 +4,7 @@ locals {
 
 
 resource "aws_iam_user" "user" {
-  name = "iam-static-website-deployment-${var.deployment}"
+  name = "iam-static-website-deployment-${var.site_settings.top_level_domain}-${var.deployment}"
   path = "/cascade/"
 
 }

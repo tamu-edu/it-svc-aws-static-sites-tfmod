@@ -3,7 +3,7 @@ locals {
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
-  name = "iam-for-lambda-edge-${var.deployment}"
+  name = "iam-for-lambda-edge-${var.site_settings.top_level_domain}-${var.deployment}"
 
   assume_role_policy = jsonencode(
     {
@@ -23,7 +23,7 @@ resource "aws_iam_role" "iam_for_lambda" {
 
 resource "aws_iam_policy" "iam_policy_for_lambda" {
 
-  name        = "aws_iam_policy_for_terraform_aws_lambda_role_${var.deployment}"
+  name        = "aws_iam_policy_for_terraform_aws_lambda_role_${replace(var.site_settings.top_level_domain, ".", "_")}_${var.deployment}"
   path        = "/cloudfront/lambda/"
   description = "AWS IAM Policy for managing aws lambda role"
   policy = jsonencode(
@@ -50,20 +50,19 @@ resource "aws_iam_policy" "iam_policy_for_lambda" {
           ]
           Effect = "Allow"
         },
-        local.sso_required ? (
         {
-          Action = [
+          Action = local.sso_required ? [
             "secretsmanager:GetResourcePolicy",
             "secretsmanager:GetSecretValue",
             "secretsmanager:DescribeSecret",
             "secretsmanager:ListSecretVersionIds"
-          ]
-          Resource = [
+          ] : ["none:none"]
+          Resource = local.sso_required ? [
             aws_secretsmanager_secret.cf_oidc_config[0].arn,
             aws_secretsmanager_secret.sso_pages[0].arn
-          ]
+          ] : ["*"]
           Effect = "Allow"
-        }) : null
+        }
       ]
   })
 }
@@ -93,7 +92,7 @@ resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role" {
 
 resource "aws_lambda_function" "edge_rewrite" {
   filename      = data.archive_file.zip_edge_rewrite.output_path
-  function_name = "LambdaEdgeRewriteFunction-${var.deployment}"
+  function_name = "LambdaEdgeRewriteFunction-${replace(var.site_settings.top_level_domain, ".", "_")}-${var.deployment}"
   role          = aws_iam_role.iam_for_lambda.arn
   handler       = "index.handler"
   publish       = true
@@ -121,7 +120,7 @@ resource "aws_lambda_function" "edge_rewrite" {
 resource "aws_lambda_function" "oidc_auth" {
   count = local.enable_hostname_rewrites ? 0 : (local.sso_required ? 1 : 0)
   filename      = data.archive_file.oidc_auth[0].output_path
-  function_name = "OIDCAuthFunction-${var.deployment}"
+  function_name = "OIDCAuthFunction-${replace(var.site_settings.top_level_domain, ".", "_")}-${var.deployment}"
   role          = aws_iam_role.iam_for_lambda.arn
   handler       = "auth.handle"
   publish       = true
@@ -136,7 +135,7 @@ resource "aws_lambda_function" "edge_host_header" {
   count = local.enable_hostname_rewrites ? 1 : 0
 
   filename      = data.archive_file.zip_edge_host_header[0].output_path
-  function_name = "LambdaEdgeHostHeaderFunction-${var.deployment}"
+  function_name = "LambdaEdgeHostHeaderFunction-${replace(var.site_settings.top_level_domain, ".", "_")}-${var.deployment}"
   role          = aws_iam_role.iam_for_lambda.arn
   handler       = "index.handler"
   publish       = true
@@ -213,7 +212,7 @@ EOT
 data "archive_file" "zip_edge_rewrite" {
   type             = "zip"
   source_dir       = data.external.rewrite_lambda_dependencies.result.target_dir
-  output_path      = "${path.module}/LambdaEdgeRewriteFunction.zip"
+  output_path      = "${path.module}/LambdaEdgeRewriteFunction-${var.site_settings.top_level_domain}-${var.deployment}.zip"
   output_file_mode = "0666"
 }
 
@@ -231,7 +230,7 @@ data "archive_file" "oidc_auth" {
 
   type             = "zip"
   source_dir       = data.external.oidc_auth_lambda_dependencies[0].result.target_dir
-  output_path      = "${path.module}/LambdaEdgeOIDCAuthFunction.zip"
+  output_path      = "${path.module}/LambdaEdgeOIDCAuthFunction-${var.site_settings.top_level_domain}-${var.deployment}.zip"
   output_file_mode = "0666"
 }
 
@@ -240,7 +239,7 @@ data "archive_file" "zip_edge_host_header" {
 
   type             = "zip"
   source_dir       = data.external.host_header_lambda_dependencies[0].result.target_dir
-  output_path      = "${path.module}/LambdaEdgeHostHeaderFunction.zip"
+  output_path      = "${path.module}/LambdaEdgeHostHeaderFunction-${var.site_settings.top_level_domain}-${var.deployment}.zip"
   output_file_mode = "0666"
 }
 
