@@ -6,7 +6,7 @@ locals {
     [local.domain],
     # This is for the top-level domain in production only
     var.site_settings.top_level_domain == "" || var.deployment != "prod" ? [] : [var.site_settings.top_level_domain],
-    var.site_settings.additional_domains == null ? tolist([]) : tolist(var.site_settings.additional_domains),
+    var.site_settings.additional_domains == null ? tolist([]) : (var.deployment != "prod" ? tolist([]) : tolist(var.site_settings.additional_domains),
     # This is for the optional global accelerator
     var.global_accelerator_source == "" ? [] : [var.global_accelerator_source],
     try(var.site_settings.additional_certs, var.additional_certs)
@@ -49,7 +49,8 @@ resource "infoblox_cname_record" "aws_cert_cname_record_tamu"{
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
-    } if length(regexall("${var.site_settings.top_level_domain}$", dvo.domain_name)) > 0
+    #} if length(regexall("${var.site_settings.top_level_domain}$", dvo.domain_name)) > 0
+    } if endswith(dvo.domain_name, "tamu.edu") && !endswith(dvo.domain_name, "cloud.tamu.edu")
   }
 
   canonical	= trim(each.value.record, ".")
@@ -65,7 +66,8 @@ resource "infoblox_cname_record" "aws_cert_cname_record_internet"{
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
-    } if length(regexall("${var.site_settings.top_level_domain}$", dvo.domain_name)) > 0
+    #} if length(regexall("${var.site_settings.top_level_domain}$", dvo.domain_name)) > 0
+    } if endswith(dvo.domain_name, "tamu.edu") && !endswith(dvo.domain_name, "cloud.tamu.edu")
   }
 
   canonical	= trim(each.value.record, ".")
