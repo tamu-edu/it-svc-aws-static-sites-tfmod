@@ -1,0 +1,7 @@
+version: "3.9"
+services:
+  build:
+    image: public.ecr.aws/lambda/nodejs:${LAMBDA_RUNTIME}
+    volumes:
+      - ./:/app
+    entrypoint: bash -c 'cd /app && npm install'

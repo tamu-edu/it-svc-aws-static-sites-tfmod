@@ -1,0 +1,15 @@
+# Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: SAM configuration for cloudfront cache invalidation function (SAM is used for local testing only)
+Resources:
+  CloudFrontCacheInvalidationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Role: !GetAtt LambdaEdgeFunctionRole.Arn
+      Runtime: nodejs20.x
+      Handler: index.handler
+      Timeout: 20 
+      AutoPublishAlias: LIVE

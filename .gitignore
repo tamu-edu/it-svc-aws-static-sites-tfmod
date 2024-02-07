@@ -5,3 +5,4 @@ localstack/testing_output
 **/sm-key*
 .DS_Store
 *.zip
+**/.aws-sam
