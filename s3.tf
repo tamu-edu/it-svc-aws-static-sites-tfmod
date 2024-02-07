@@ -22,27 +22,6 @@ resource "aws_s3_bucket_ownership_controls" "bucket" {
 }
 
 
-#resource "aws_s3_bucket_website_configuration" "bucket" {
-#  bucket = aws_s3_bucket.bucket.id
-#
-#  index_document {
-#    suffix = "index.html"
-#  }
-#
-#  error_document {
-#    key = "error.html"
-#  }
-#}
-
-#resource "aws_s3_bucket_public_access_block" "bucket" {
-#  bucket = aws_s3_bucket.bucket.id
-#
-#  block_public_acls       = false
-#  block_public_policy     = false
-#  ignore_public_acls      = false
-#  restrict_public_buckets = false
-#}
-
 resource "aws_s3_bucket_public_access_block" "bucket" {
   bucket = aws_s3_bucket.bucket.id
 
@@ -104,21 +83,6 @@ resource "aws_s3_bucket_policy" "site_bucket_policy" {
       Version = "2012-10-17"
       Id      = "BUCKETPOLICY"
       Statement = [
-        #{
-        #  Sid       = "PublicAccess"
-        #  Effect    = "Allow"
-        #  Principal = "*"
-        #  Action = [
-        #    "s3:GetObject",
-        #    "s3:GetObjectVersion",
-        #    "s3:GetBucketLocation",
-        #    "s3:ListBucket"
-        #  ]
-        #  Resource = [
-        #    "arn:aws:s3:::${aws_s3_bucket.bucket.bucket}/*",
-        #    "arn:aws:s3:::${aws_s3_bucket.bucket.bucket}"
-        #  ]
-        #},
         {
           Sid    = "AllowCloudFrontServicePrincipal"
           Effect = "Allow"
@@ -147,4 +111,17 @@ resource "aws_s3_bucket_policy" "site_bucket_policy" {
   depends_on = [
     aws_s3_bucket_public_access_block.bucket
   ]
+}
+
+# Enable cache invalidation on the S3 object creation of the invalidate_cache.txt file
+resource "aws_s3_bucket_notification" "cache_invalidation_notification" {
+  bucket = aws_s3_bucket.bucket.bucket
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.cloudfront_cache_invalidation.arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = "invalidate_cache.txt"
+  }
+
+  depends_on = [ aws_lambda_permission.allow_s3_to_invoke_lambda ]
 }

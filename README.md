@@ -56,6 +56,18 @@ The `site_settings` line take a dictionary of variable overrides and includes th
 |route53_tld|cloud.tamu.edu|The top level domain in route53 where subdomains are added|
 |rules_cache_timeout|3602|The number of seconds to cache rewrite rules|
 
+## Cache Invalidation
+The cache can be invalidated for a CloudFront distribution by publishing a file
+named `invalidate_cache.txt` to the root of the distribution's S3 bucket. The
+first line should contain a timestamp, and each additional line should contain 
+invalidation paths. For example:
+
+```text
+1707345054
+/test
+/*
+```
+
 ## IAM User Bucket Credentials
 
 Access to IAM user credentials for S3 bucket access is provided through [TAMU's instance of

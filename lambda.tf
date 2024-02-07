@@ -51,6 +51,22 @@ resource "aws_iam_policy" "iam_policy_for_lambda" {
           Effect = "Allow"
         },
         {
+          Action = [
+            "cloudfront:GetDistribution",
+            "cloudfront:GetDistributionConfig",
+            "cloudfront:ListDistributions"
+          ]
+          Resource = "*"
+          Effect   = "Allow"
+        },
+        {
+          Action = [
+            "cloudfront:CreateInvalidation",
+          ]
+          Resource = aws_cloudfront_distribution.site.arn
+          Effect   = "Allow"
+        },
+        {
           Action = local.sso_required ? [
             "secretsmanager:GetResourcePolicy",
             "secretsmanager:GetSecretValue",
@@ -67,22 +83,6 @@ resource "aws_iam_policy" "iam_policy_for_lambda" {
   })
 }
 
-#resource "aws_cloudwatch_log_group" "rewrite_log_group" {
-#  name              = "/aws/lambda/${aws_lambda_function.edge_rewrite.function_name}"
-#  retention_in_days = var.log_expiration
-#}
-
-#resource "aws_cloudwatch_log_group" "security_log_group" {
-#  name              = "/aws/lambda/${aws_lambda_function.edge_security.function_name}"
-#  retention_in_days = var.log_expiration
-#}
-
-#resource "aws_cloudwatch_log_group" "host_header_log_group" {
-#  count = local.enable_hostname_rewrites ? 1 : 0
-#
-#  name              = "/aws/lambda/${aws_lambda_function.edge_host_header[0].function_name}"
-#  retention_in_days = var.log_expiration
-#}
 
 resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role" {
   role       = aws_iam_role.iam_for_lambda.name
@@ -104,18 +104,6 @@ resource "aws_lambda_function" "edge_rewrite" {
 
 }
 
-#resource "aws_lambda_function" "edge_security" {
-#  filename      = data.archive_file.zip_edge_security.output_path
-#  function_name = "LambdaEdgeSecurityFunction-${var.deployment}"
-#  role          = aws_iam_role.iam_for_lambda.arn
-#  handler       = "index.handler"
-#  publish       = true
-#
-#  source_code_hash = data.archive_file.zip_edge_security.output_base64sha256
-#
-#  runtime = "nodejs${var.lambda_runtime}.x"
-#
-#}
 
 resource "aws_lambda_function" "oidc_auth" {
   count = local.enable_hostname_rewrites ? 0 : (local.sso_required ? 1 : 0)
@@ -146,6 +134,29 @@ resource "aws_lambda_function" "edge_host_header" {
 
 }
 
+resource "aws_lambda_function" "cloudfront_cache_invalidation" {
+  filename      = data.archive_file.zip_cloudfront_cache_invalidation.output_path
+  function_name = "CloudFrontCacheInvalidationFunction-${replace(var.site_settings.top_level_domain, ".", "_")}-${var.deployment}"
+  role          = aws_iam_role.iam_for_lambda.arn
+  handler       = "index.handler"
+  publish       = true
+  timeout       = 30  
+
+  source_code_hash = data.archive_file.zip_cloudfront_cache_invalidation.output_base64sha256
+
+  runtime = "nodejs${var.lambda_runtime}.x"
+
+}
+
+# Some additional permissions to enable the lambda to be invoked by S3 notifications
+resource "aws_lambda_permission" "allow_s3_to_invoke_lambda" {
+  statement_id  = "AllowExecutionFromS3"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.cloudfront_cache_invalidation.function_name
+  principal     = "s3.amazonaws.com"
+  source_arn    = aws_s3_bucket.bucket.arn
+}
+
 # Vendor the dependencies
 data "external" "rewrite_lambda_dependencies" {
   program = ["bash", "-c", <<EOT
@@ -156,15 +167,6 @@ EOT
   ]
 }
 
-# Vendor the dependencies
-#data "external" "security_lambda_dependencies" {
-#  program = ["bash", "-c", <<EOT
-#(cd ${path.module}/LambdaEdgeFunctions/security && LAMBDA_FUNCTION_NAME=security \
-#  LAMBDA_RUNTIME=${var.lambda_runtime} docker compose up; docker compose down) >&2 > /tmp/security.log && \
-#echo "{\"target_dir\": \"${path.module}/LambdaEdgeFunctions/security\"}"
-#EOT
-#  ]
-#}
 
 # Vendor the dependencies
 data "external" "oidc_auth_lambda_dependencies" {
@@ -208,6 +210,16 @@ EOT
   ]
 }
 
+# Vendor the dependencies
+data "external" "cloudfront_cache_invalidation_lambda_dependencies" {
+  program = ["bash", "-c", <<EOT
+(cd ${path.module}/LambdaEdgeFunctions/cf_cache_invalidation && LAMBDA_FUNCTION_NAME=cf_cache_invalidation \
+  LAMBDA_RUNTIME=${var.lambda_runtime} docker compose up; docker compose down) >&2 > /tmp/cf_cache_invalidation.log && \
+echo "{\"target_dir\": \"${path.module}/LambdaEdgeFunctions/cf_cache_invalidation\"}"
+EOT
+  ]
+}
+
 # The output_file_mode makes this zip file deterministic across environments
 data "archive_file" "zip_edge_rewrite" {
   type             = "zip"
@@ -216,13 +228,6 @@ data "archive_file" "zip_edge_rewrite" {
   output_file_mode = "0666"
 }
 
-# The output_file_mode makes this zip file deterministic across environments
-#data "archive_file" "zip_edge_security" {
-#  type             = "zip"
-#  source_dir       = data.external.security_lambda_dependencies.result.target_dir
-#  output_path      = "${path.module}/LambdaEdgeSecurityFunction.zip"
-#  output_file_mode = "0666"
-#}
 
 # The output_file_mode makes this zip file deterministic across environments
 data "archive_file" "oidc_auth" {
@@ -243,6 +248,13 @@ data "archive_file" "zip_edge_host_header" {
   output_file_mode = "0666"
 }
 
+# The output_file_mode makes this zip file deterministic across environments
+data "archive_file" "zip_cloudfront_cache_invalidation" {
+  type             = "zip"
+  source_dir       = data.external.cloudfront_cache_invalidation_lambda_dependencies.result.target_dir
+  output_path      = "${path.module}/CloudFrontCacheInvalidationFunction-${var.site_settings.top_level_domain}-${var.deployment}.zip"
+  output_file_mode = "0666"
+}
 
 
 # This was moved to lambda.tf so that localstack could use that file independently
