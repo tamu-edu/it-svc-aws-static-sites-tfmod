@@ -136,7 +136,7 @@ resource "aws_lambda_function" "edge_host_header" {
 
 resource "aws_lambda_function" "cloudfront_cache_invalidation" {
   filename      = data.archive_file.zip_cloudfront_cache_invalidation.output_path
-  function_name = "CloudFrontCacheInvalidationFunction-${replace(var.site_settings.top_level_domain, ".", "_")}-${var.deployment}"
+  function_name = "CFInvalFunction-${replace(var.site_settings.top_level_domain, ".", "_")}-${var.deployment}"
   role          = aws_iam_role.iam_for_lambda.arn
   handler       = "index.handler"
   publish       = true
@@ -252,7 +252,7 @@ data "archive_file" "zip_edge_host_header" {
 data "archive_file" "zip_cloudfront_cache_invalidation" {
   type             = "zip"
   source_dir       = data.external.cloudfront_cache_invalidation_lambda_dependencies.result.target_dir
-  output_path      = "${path.module}/CloudFrontCacheInvalidationFunction-${var.site_settings.top_level_domain}-${var.deployment}.zip"
+  output_path      = "${path.module}/CFInvalFunction-${var.site_settings.top_level_domain}-${var.deployment}.zip"
   output_file_mode = "0666"
 }
 
