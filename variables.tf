@@ -13,7 +13,7 @@ variable "additional_cloudfront_aliases" {
 variable "allow_bucket_force_destroy" {
   type        = bool
   description = "Allow buckets to be destroyed when doing a terraform destroy"
-  default     = false
+  default     = true
 }
 
 variable "aws_account_name" {
