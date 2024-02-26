@@ -683,7 +683,9 @@ resource "aws_cloudfront_distribution" "site" {
   }
 
   depends_on = [
-    aws_acm_certificate_validation.cert
+    aws_acm_certificate_validation.cert,
+    aws_s3_bucket_ownership_controls.bucket,
+    aws_s3_bucket_ownership_controls.bucket_logging
   ]
 }
 
