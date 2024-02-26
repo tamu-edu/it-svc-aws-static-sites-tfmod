@@ -1,6 +1,5 @@
 resource "aws_s3_bucket" "bucket" {
-  #bucket        = "${data.aws_caller_identity.current.account_id}-site-${local.site_name_dashes}-${var.deployment}"
-  bucket        = "site-${local.site_name_dashes}-${var.deployment}"
+  bucket        = "${data.aws_caller_identity.current.account_id}-site-${local.site_name_dashes}-${var.deployment}"
   force_destroy = var.allow_bucket_force_destroy
 }
 
@@ -33,8 +32,7 @@ resource "aws_s3_bucket_public_access_block" "bucket" {
 }
 
 resource "aws_s3_bucket" "bucket_logging" {
-  #bucket        = "${data.aws_caller_identity.current.account_id}-site-${local.site_name_dashes}-${var.deployment}-logs"
-  bucket        = "site-${local.site_name_dashes}-${var.deployment}-logs"
+  bucket        = "${data.aws_caller_identity.current.account_id}-site-${local.site_name_dashes}-${var.deployment}-logs"
   force_destroy = var.allow_bucket_force_destroy
 }
 
