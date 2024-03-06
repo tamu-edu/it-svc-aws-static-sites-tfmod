@@ -1,12 +1,13 @@
 locals {
   site_name_dashes = replace(var.site_settings.top_level_domain, ".", "-")
+
+  iam_user_name = substr("iam-static-website-deployment-${var.site_settings.top_level_domain}-${var.deployment}", 0, 64)
 }
 
 
 resource "aws_iam_user" "user" {
-  name = "iam-static-website-deployment-${var.site_settings.top_level_domain}-${var.deployment}"
+  name = local.iam_user_name
   path = "/cascade/"
-
 }
 
 resource "aws_iam_user_policy" "policy" {
