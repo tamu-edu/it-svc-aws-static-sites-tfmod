@@ -9,6 +9,21 @@ locals {
   rewrite_rules_location = "https://${var.site_settings.top_level_domain}.${var.deployment}.${var.route53_tld}/rewrite_rules.json"
 }
 
+# This data source doesn't work for CLOUDFRONT-scoped web ACLs (only REGIONAL)
+/*
+data "aws_waf_web_acl" "default_cf_web_acl" {
+  name = "default-cf-web-acl"
+}
+*/
+
+# This is a hack to get the web ACL ARN for the default web ACL given the above mentioned limitation
+data "external" "default_cf_web_acl" {
+  program = ["bash", "-c", <<EOT
+aws wafv2 list-web-acls --scope CLOUDFRONT --query "WebACLs[?Name=='${var.web_acl_name}'] | [0]"
+EOT
+  ]
+}
+
 
 resource "aws_cloudfront_distribution" "site" {
   enabled             = true
@@ -16,6 +31,7 @@ resource "aws_cloudfront_distribution" "site" {
   comment             = "Static Website + Lambda@Edge (${var.deployment})"
   aliases             = local.aliases
   default_root_object = "index.html"
+  web_acl_id          = data.external.default_cf_web_acl.result.ARN
 
 
   viewer_certificate {

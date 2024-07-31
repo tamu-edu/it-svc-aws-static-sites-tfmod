@@ -252,3 +252,9 @@ variable "sso_pages" {
   description = "A list of regular expressions that will be used to determine which pages require SSO authentication"
   default     = []
 }
+
+variable "web_acl_name" {
+  type        = string
+  description = "The name of the web ACL to associate with the CloudFront distribution"
+  default     = "default-cf-web-acl"
+}
