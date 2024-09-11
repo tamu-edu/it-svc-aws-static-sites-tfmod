@@ -43,7 +43,8 @@ class RuleSet {
 
   getRawRules(request) {
     // REMOVE THIS
-    //return "https://blake-test.engr.tamu.edu.dev.sites-marcom.cloud.tamu.edu/rewrite_rules.json";
+    //console.log("Using fixed rule location");
+    //return "https://www.law.tamu.edu.prod.sites-marcom.cloud.tamu.edu/rewrite_rules.json";
     // REMOVE THIS
 
     if (request !== undefined && 'rules-url' in request.origin.s3.customHeaders) {
@@ -83,7 +84,10 @@ class RuleSet {
           return true;
         });
       }
-      return axios.get(this.rawRuleSet).then((res) => {
+      return axios.get(this.rawRuleSet,
+        { headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:21.0) Gecko/20100101 Firefox/21.0'} }
+
+      ).then((res) => {
         this.rewriteRules = this.parseRules(res.data);
         console.log("rewriteRules:");
         console.log(JSON.stringify(this.rewriteRules));
