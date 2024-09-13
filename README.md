@@ -1,4 +1,4 @@
-# vpasc-vpmc-terraform-module-aws-static-site
+# it-svc-aws-static-sites-tfmod
 
 Terraform module for creating AWS CloudFront + Lambda@Edge static sites
 
