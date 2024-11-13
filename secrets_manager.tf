@@ -1,9 +1,9 @@
 locals {
-  oid_secret_name   = "${var.oidc_auth_config_secret_name_base}/${var.site_settings.top_level_domain}"
-  callback_fqdn = var.deployment == "prod" ? var.site_settings.top_level_domain : local.domain
+  oid_secret_name = "${var.oidc_auth_config_secret_name_base}/${var.site_settings.top_level_domain}"
+  callback_fqdn   = var.deployment == "prod" ? var.site_settings.top_level_domain : local.domain
 
-  sso_required = try(var.site_settings.sso_required, var.sso_required)
-  sso_pages = try(var.site_settings.sso_pages, var.sso_pages)
+  sso_required    = try(var.site_settings.sso_required, var.sso_required)
+  sso_pages       = try(var.site_settings.sso_pages, var.sso_pages)
   sso_secret_name = "${var.sso_pages_secret_name_base}/${var.site_settings.top_level_domain}"
 }
 
@@ -11,12 +11,13 @@ locals {
 resource "aws_secretsmanager_secret" "cf_oidc_config" {
   count = local.sso_required ? 1 : 0
 
-  name        = local.oid_secret_name
-  description = "Credentials for setting up site authentication via OIDC"
+  name                    = local.oid_secret_name
+  description             = "Credentials for setting up site authentication via OIDC"
+  recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret_version" "cf_oidc_config" {
-  count     = local.sso_required ? 1 : 0
+  count = local.sso_required ? 1 : 0
 
   secret_id = aws_secretsmanager_secret.cf_oidc_config[0].id
   secret_string = jsonencode({
@@ -52,13 +53,14 @@ resource "aws_secretsmanager_secret_version" "cf_oidc_config" {
 resource "aws_secretsmanager_secret" "sso_pages" {
   count = local.sso_required ? 1 : 0
 
-  name        = local.sso_secret_name
-  description = "A list of regular expressions that will be used to determine which pages require SSO authentication"
+  name                    = local.sso_secret_name
+  description             = "A list of regular expressions that will be used to determine which pages require SSO authentication"
+  recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret_version" "sso_pages" {
-  count     = local.sso_required ? 1 : 0
+  count = local.sso_required ? 1 : 0
 
-  secret_id = aws_secretsmanager_secret.sso_pages[0].id
+  secret_id     = aws_secretsmanager_secret.sso_pages[0].id
   secret_string = join(";", local.sso_pages)
 }
