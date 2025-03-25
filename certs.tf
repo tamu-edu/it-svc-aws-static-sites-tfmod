@@ -50,7 +50,7 @@ resource "infoblox_cname_record" "aws_cert_cname_record_tamu"{
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
     #} if length(regexall("${var.site_settings.top_level_domain}$", dvo.domain_name)) > 0
-    } if endswith(dvo.domain_name, "tamu.edu") && !endswith(dvo.domain_name, "cloud.tamu.edu")
+    } if endswith(dvo.domain_name, "tamu.edu") && !endswith(dvo.domain_name, ".cloud.tamu.edu")
   }
 
   canonical	= trim(each.value.record, ".")
@@ -67,7 +67,7 @@ resource "infoblox_cname_record" "aws_cert_cname_record_internet"{
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
     #} if length(regexall("${var.site_settings.top_level_domain}$", dvo.domain_name)) > 0
-    } if endswith(dvo.domain_name, "tamu.edu") && !endswith(dvo.domain_name, "cloud.tamu.edu")
+    } if endswith(dvo.domain_name, "tamu.edu") && !endswith(dvo.domain_name, ".cloud.tamu.edu")
   }
 
   canonical	= trim(each.value.record, ".")
