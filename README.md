@@ -55,6 +55,7 @@ The `site_settings` line take a dictionary of variable overrides and includes th
 |rewrite_rules_location||The publicly accessible URL of the rewrite rules file|
 |route53_tld|cloud.tamu.edu|The top level domain in route53 where subdomains are added|
 |rules_cache_timeout|3602|The number of seconds to cache rewrite rules|
+|use_infoblox|true|Whether or not to insert infoblox domain validation records if necessary|
 
 ## Cache Invalidation
 The cache can be invalidated for a CloudFront distribution by publishing a file
