@@ -737,6 +737,11 @@ resource "aws_cloudfront_response_headers_policy" "site" {
       content_security_policy = try(var.site_settings.content_security_policy, var.content_security_policy)
       override = true
     }
+
+    frame_options {
+      frame_option = try(var.site_settings.x_frame_options, var.x_frame_options)
+      override     = true
+    }
   }
 
   cors_config {

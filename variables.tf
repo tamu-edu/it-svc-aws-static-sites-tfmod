@@ -264,3 +264,9 @@ variable "web_acl_name" {
   description = "The name of the web ACL to associate with the CloudFront distribution"
   default     = "default-cf-web-acl"
 }
+
+variable "x_frame_options" {
+  type        = string
+  description = "The X-Frame-Options header to use for the site"
+  default     = "SAMEORIGIN"
+}
