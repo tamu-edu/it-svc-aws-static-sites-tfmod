@@ -36,7 +36,7 @@ variable "cors_allowed_methods" {
 variable "content_security_policy" {
   type        = string
   description = "The content security policy to use for the site"
-  default     = "frame-ancestors 'self' https://*.tamu.edu"
+  default     = "frame-ancestors 'self' https://*.tamu.edu https://*.ally.ac"
 }
 
 variable "cors_allowed_origins" {
