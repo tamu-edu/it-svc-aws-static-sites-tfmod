@@ -764,7 +764,7 @@ resource "aws_cloudfront_response_headers_policy" "site" {
 }
 
 resource "aws_cloudfront_origin_access_control" "site" {
-  name                              = "site-origin-access-control-${replace(var.site_settings.top_level_domain, ".", "-")}-${var.deployment}"
+  name                              = substr("site-origin-access-control-${replace(var.site_settings.top_level_domain, ".", "-")}-${var.deployment}", 0, 64)
   description                       = "Site Policy (${var.site_settings.top_level_domain}-${var.deployment}))"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
