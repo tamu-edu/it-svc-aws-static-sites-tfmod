@@ -88,20 +88,8 @@ variable "error_response_404_path" {
 #  default     = false
 #}
 
-variable "global_accelerator" {
-  description = "The FQDN for the global accelerator (i.e., tamu.edu) certificate. Leave blank to not generate a cert"
-  type        = string
-  default     = ""
-}
-
-#variable "global_accelerator_source" {
-#  description = "The source address for the global accelerator (i.e., tamu.edu). Leave blank to not use a GA"
-#  type        = string
-#  default     = ""
-#}
-#
-#variable "global_accelerator_target" {
-#  description = "The target address for the global accelerator (i.e., www.tamu.edu). Leave blank to not use a GA"
+#variable "global_accelerator" {
+#  description = "The FQDN for the global accelerator (i.e., tamu.edu) certificate. Leave blank to not generate a cert"
 #  type        = string
 #  default     = ""
 #}
