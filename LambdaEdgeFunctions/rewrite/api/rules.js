@@ -10,6 +10,7 @@ const hostSyntax =  /H=([^,]+)/;
 const flagSyntax = /\[([^\]]+)]$/;
 const partsSyntax = /\s+|\t+/g;
 const DEFAULT_CACHE_TIMEOUT = 600 * 1000; // (600 seconds in milliseconds)
+//const DEFAULT_CACHE_TIMEOUT = 10 * 1000; // (10 seconds in milliseconds)
 
 const default_rules = [
   "^//.* /index.html [R,L]",

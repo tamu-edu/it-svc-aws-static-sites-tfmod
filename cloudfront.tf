@@ -91,7 +91,7 @@ resource "aws_cloudfront_distribution" "site" {
         forward = "none"
       }
 
-      headers = local.enable_hostname_rewrites ? ["X-Forwarded-Host"] : null
+      headers = local.enable_hostname_header_caching ? ["X-Forwarded-Host"] : null
     }
     compress               = true
     viewer_protocol_policy = "redirect-to-https"
@@ -143,7 +143,7 @@ resource "aws_cloudfront_distribution" "site" {
 
     forwarded_values {
       query_string = false
-      headers      = local.enable_hostname_rewrites ? ["Origin", "X-Forwarded-Host"] : ["Origin"]
+      headers      = local.enable_hostname_header_caching ? ["Origin", "X-Forwarded-Host"] : ["Origin"]
 
       cookies {
         forward = "none"
@@ -218,7 +218,7 @@ resource "aws_cloudfront_distribution" "site" {
         forward = "none"
       }
 
-      headers = local.enable_hostname_rewrites ? ["X-Forwarded-Host"] : null
+      headers = local.enable_hostname_header_caching ? ["X-Forwarded-Host"] : null
     }
 
     lambda_function_association {
@@ -250,7 +250,7 @@ resource "aws_cloudfront_distribution" "site" {
         forward = "none"
       }
 
-      headers = local.enable_hostname_rewrites ? ["X-Forwarded-Host"] : null
+      headers = local.enable_hostname_header_caching ? ["X-Forwarded-Host"] : null
     }
 
     lambda_function_association {
@@ -307,7 +307,7 @@ resource "aws_cloudfront_distribution" "site" {
         forward = "none"
       }
 
-      headers = local.enable_hostname_rewrites ? ["X-Forwarded-Host"] : null
+      headers = local.enable_hostname_header_caching ? ["X-Forwarded-Host"] : null
     }
 
     lambda_function_association {
@@ -364,7 +364,7 @@ resource "aws_cloudfront_distribution" "site" {
         forward = "none"
       }
 
-      headers = local.enable_hostname_rewrites ? ["X-Forwarded-Host"] : null
+      headers = local.enable_hostname_header_caching ? ["X-Forwarded-Host"] : null
     }
 
     lambda_function_association {
@@ -421,7 +421,7 @@ resource "aws_cloudfront_distribution" "site" {
         forward = "none"
       }
 
-      headers = local.enable_hostname_rewrites ? ["X-Forwarded-Host"] : null
+      headers = local.enable_hostname_header_caching ? ["X-Forwarded-Host"] : null
     }
 
     lambda_function_association {
@@ -478,7 +478,7 @@ resource "aws_cloudfront_distribution" "site" {
         forward = "none"
       }
 
-      headers = local.enable_hostname_rewrites ? ["X-Forwarded-Host"] : null
+      headers = local.enable_hostname_header_caching ? ["X-Forwarded-Host"] : null
     }
 
     lambda_function_association {
@@ -535,7 +535,7 @@ resource "aws_cloudfront_distribution" "site" {
         forward = "none"
       }
 
-      headers = local.enable_hostname_rewrites ? ["X-Forwarded-Host"] : null
+      headers = local.enable_hostname_header_caching ? ["X-Forwarded-Host"] : null
     }
 
     lambda_function_association {
@@ -592,7 +592,7 @@ resource "aws_cloudfront_distribution" "site" {
         forward = "none"
       }
 
-      headers = local.enable_hostname_rewrites ? ["X-Forwarded-Host"] : null
+      headers = local.enable_hostname_header_caching ? ["X-Forwarded-Host"] : null
     }
 
     lambda_function_association {
@@ -649,7 +649,7 @@ resource "aws_cloudfront_distribution" "site" {
         forward = "none"
       }
 
-      headers = local.enable_hostname_rewrites ? ["X-Forwarded-Host"] : null
+      headers = local.enable_hostname_header_caching ? ["X-Forwarded-Host"] : null
     }
 
     lambda_function_association {
