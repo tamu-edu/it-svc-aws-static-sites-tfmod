@@ -1,5 +1,7 @@
 locals {
-  enable_hostname_rewrites = try(var.site_settings.enable_hostname_rewrites == "true", var.enable_hostname_rewrites)
+  enable_hostname_rewrites = try(var.site_settings.enable_hostname_rewrites, var.enable_hostname_rewrites)
+  enable_sso_auth = try(var.site_settings.sso_required, var.sso_required)
+  enable_hostname_header_caching = local.enable_hostname_rewrites || local.enable_sso_auth
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
