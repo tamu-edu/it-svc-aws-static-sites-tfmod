@@ -52,6 +52,7 @@ resource "aws_cloudfront_distribution" "site" {
     domain_name              = aws_s3_bucket.bucket.bucket_regional_domain_name
     origin_id                = aws_s3_bucket.bucket.bucket
     origin_access_control_id = aws_cloudfront_origin_access_control.site.id
+    #origin_access_control_id = data.aws_cloudfront_origin_access_control.site.id
     custom_header {
       name  = "rules-cache-timeout"
       value = try(var.site_settings.rules_cache_timeout, var.rules_cache_timeout)
@@ -775,5 +776,19 @@ resource "aws_cloudfront_origin_access_control" "site" {
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
+#data "external" "get_oac" {
+#  program = ["bash", "-c", <<EOT
+#aws cloudfront list-origin-access-controls --query "OriginAccessControlList.Items[?Name=='site-origin-access-control-all-sites'] | [0]"
+#EOT
+#  ]
+#}
+#
+#data "aws_cloudfront_origin_access_control" "site" {
+#  id = data.external.get_oac.result.Id
+#}
