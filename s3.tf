@@ -45,6 +45,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket_logging" {
     expiration {
       days = var.log_expiration
     }
+    filter {
+      prefix = ""
+    }
   }
 }
 

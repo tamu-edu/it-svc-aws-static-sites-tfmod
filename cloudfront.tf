@@ -7,6 +7,18 @@ locals {
   ))
 
   rewrite_rules_location = "https://${var.site_settings.top_level_domain}.${var.deployment}.${var.route53_tld}/rewrite_rules.json"
+
+  #use_response_headers_default_policy = !(
+  #  try(var.site_settings.content_security_policy, null) != null ||
+  #  try(var.site_settings.x_frame_options, null) != null ||
+  #  try(var.site_settings.cors_allowed_headers, null) != null ||
+  #  try(var.site_settings.cors_allowed_methods, null) != null ||
+  #  try(var.site_settings.cors_allowed_origins, null) != null
+  #)
+  use_response_headers_default_policy = false
+  response_headers_policy_id = local.use_response_headers_default_policy ? data.aws_cloudfront_response_headers_policy.site_default.id : aws_cloudfront_response_headers_policy.site[0].id
+
+  use_oac_default_policy = false
 }
 
 # This data source doesn't work for CLOUDFRONT-scoped web ACLs (only REGIONAL)
@@ -49,10 +61,11 @@ resource "aws_cloudfront_distribution" "site" {
     #  origin_protocol_policy = "https-only"
     #  origin_ssl_protocols   = var.origin_ssl_protocols
     #}
-    domain_name              = aws_s3_bucket.bucket.bucket_regional_domain_name
-    origin_id                = aws_s3_bucket.bucket.bucket
-    origin_access_control_id = aws_cloudfront_origin_access_control.site.id
+    domain_name = aws_s3_bucket.bucket.bucket_regional_domain_name
+    origin_id   = aws_s3_bucket.bucket.bucket
+    #origin_access_control_id = aws_cloudfront_origin_access_control.site.id
     #origin_access_control_id = data.aws_cloudfront_origin_access_control.site.id
+    origin_access_control_id = local.use_oac_default_policy ? data.aws_cloudfront_origin_access_control.site.id : aws_cloudfront_origin_access_control.site[0].id
     custom_header {
       name  = "rules-cache-timeout"
       value = try(var.site_settings.rules_cache_timeout, var.rules_cache_timeout)
@@ -81,7 +94,7 @@ resource "aws_cloudfront_distribution" "site" {
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = aws_s3_bucket.bucket.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    response_headers_policy_id = local.response_headers_policy_id
 
     forwarded_values {
       query_string = true
@@ -140,7 +153,7 @@ resource "aws_cloudfront_distribution" "site" {
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
     cached_methods             = ["GET", "HEAD", "OPTIONS"]
     target_origin_id           = aws_s3_bucket.bucket.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    response_headers_policy_id = local.response_headers_policy_id
 
     forwarded_values {
       query_string = false
@@ -210,7 +223,7 @@ resource "aws_cloudfront_distribution" "site" {
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = aws_s3_bucket.bucket.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    response_headers_policy_id = local.response_headers_policy_id
 
     forwarded_values {
       query_string = false
@@ -242,7 +255,7 @@ resource "aws_cloudfront_distribution" "site" {
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = aws_s3_bucket.bucket.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    response_headers_policy_id = local.response_headers_policy_id
 
     forwarded_values {
       query_string = false
@@ -299,7 +312,7 @@ resource "aws_cloudfront_distribution" "site" {
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = aws_s3_bucket.bucket.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    response_headers_policy_id = local.response_headers_policy_id
 
     forwarded_values {
       query_string = false
@@ -356,7 +369,7 @@ resource "aws_cloudfront_distribution" "site" {
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = aws_s3_bucket.bucket.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    response_headers_policy_id = local.response_headers_policy_id
 
     forwarded_values {
       query_string = false
@@ -413,7 +426,7 @@ resource "aws_cloudfront_distribution" "site" {
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = aws_s3_bucket.bucket.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    response_headers_policy_id = local.response_headers_policy_id
 
     forwarded_values {
       query_string = false
@@ -470,7 +483,7 @@ resource "aws_cloudfront_distribution" "site" {
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = aws_s3_bucket.bucket.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    response_headers_policy_id = local.response_headers_policy_id
 
     forwarded_values {
       query_string = false
@@ -527,7 +540,7 @@ resource "aws_cloudfront_distribution" "site" {
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = aws_s3_bucket.bucket.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    response_headers_policy_id = local.response_headers_policy_id
 
     forwarded_values {
       query_string = false
@@ -584,7 +597,7 @@ resource "aws_cloudfront_distribution" "site" {
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = aws_s3_bucket.bucket.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    response_headers_policy_id = local.response_headers_policy_id
 
     forwarded_values {
       query_string = false
@@ -641,7 +654,7 @@ resource "aws_cloudfront_distribution" "site" {
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = aws_s3_bucket.bucket.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    response_headers_policy_id = local.response_headers_policy_id
 
     forwarded_values {
       query_string = false
@@ -714,6 +727,7 @@ resource "aws_cloudfront_distribution" "site" {
 
 
 resource "aws_cloudfront_response_headers_policy" "site" {
+  count   = local.use_response_headers_default_policy ? 0 : 1
   name    = "site-headers-policy-${replace(var.site_settings.top_level_domain, ".", "_")}-${var.deployment}"
   comment = "Site Headers Policy (${var.site_settings.top_level_domain}-${var.deployment})"
 
@@ -724,25 +738,25 @@ resource "aws_cloudfront_response_headers_policy" "site" {
 
     referrer_policy {
       referrer_policy = "same-origin"
-      override = true
+      override        = true
     }
 
     xss_protection {
       mode_block = true
       protection = true
-      override = true
+      override   = true
     }
 
     strict_transport_security {
       access_control_max_age_sec = "63072000"
-      include_subdomains = true
-      preload = true
-      override = true
+      include_subdomains         = true
+      preload                    = true
+      override                   = true
     }
 
     content_security_policy {
       content_security_policy = try(var.site_settings.content_security_policy, var.content_security_policy)
-      override = true
+      override                = true
     }
 
     frame_options {
@@ -768,9 +782,19 @@ resource "aws_cloudfront_response_headers_policy" "site" {
 
     origin_override = true
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
+data "aws_cloudfront_response_headers_policy" "site_default" {
+  name = "site-headers-policy-default"
+}
+
+
 resource "aws_cloudfront_origin_access_control" "site" {
+  count = local.use_oac_default_policy ? 0 : 1
   name                              = substr("site-origin-access-control-${replace(var.site_settings.top_level_domain, ".", "-")}-${var.deployment}", 0, 64)
   description                       = "Site Policy (${var.site_settings.top_level_domain}-${var.deployment}))"
   origin_access_control_origin_type = "s3"
@@ -782,13 +806,17 @@ resource "aws_cloudfront_origin_access_control" "site" {
   }
 }
 
-#data "external" "get_oac" {
-#  program = ["bash", "-c", <<EOT
-#aws cloudfront list-origin-access-controls --query "OriginAccessControlList.Items[?Name=='site-origin-access-control-all-sites'] | [0]"
-#EOT
-#  ]
-#}
-#
-#data "aws_cloudfront_origin_access_control" "site" {
-#  id = data.external.get_oac.result.Id
-#}
+data "external" "get_oac" {
+  program = ["bash", "-c", <<EOT
+aws cloudfront list-origin-access-controls --query "OriginAccessControlList.Items[?Name=='site-origin-access-control-all-sites'] | [0]"
+EOT
+  ]
+}
+
+data "aws_cloudfront_origin_access_control" "site" {
+  id = data.external.get_oac.result.Id
+}
+
+output "use_response_headers_default_policy" {
+  value = local.use_response_headers_default_policy
+}
