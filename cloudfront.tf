@@ -8,17 +8,18 @@ locals {
 
   rewrite_rules_location = "https://${var.site_settings.top_level_domain}.${var.deployment}.${var.route53_tld}/rewrite_rules.json"
 
-  #use_response_headers_default_policy = !(
-  #  try(var.site_settings.content_security_policy, null) != null ||
-  #  try(var.site_settings.x_frame_options, null) != null ||
-  #  try(var.site_settings.cors_allowed_headers, null) != null ||
-  #  try(var.site_settings.cors_allowed_methods, null) != null ||
-  #  try(var.site_settings.cors_allowed_origins, null) != null
-  #)
-  use_response_headers_default_policy = false
+  use_response_headers_default_policy = !(
+    try(var.site_settings.content_security_policy, null) != null ||
+    try(var.site_settings.x_frame_options, null) != null ||
+    try(var.site_settings.cors_allowed_headers, null) != null ||
+    try(var.site_settings.cors_allowed_methods, null) != null ||
+    try(var.site_settings.cors_allowed_origins, null) != null
+  )
+  #use_response_headers_default_policy = false
   response_headers_policy_id = local.use_response_headers_default_policy ? data.aws_cloudfront_response_headers_policy.site_default.id : aws_cloudfront_response_headers_policy.site[0].id
 
-  use_oac_default_policy = false
+  #use_oac_default_policy = false
+  use_oac_default_policy = true
 }
 
 # This data source doesn't work for CLOUDFRONT-scoped web ACLs (only REGIONAL)
