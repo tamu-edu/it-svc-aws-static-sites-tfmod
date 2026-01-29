@@ -794,7 +794,7 @@ data "aws_cloudfront_response_headers_policy" "site_default" {
 
 
 resource "aws_cloudfront_origin_access_control" "site" {
-  count = local.use_oac_default_policy ? 0 : 1
+  count                             = local.use_oac_default_policy ? 0 : 1
   name                              = substr("site-origin-access-control-${replace(var.site_settings.top_level_domain, ".", "-")}-${var.deployment}", 0, 64)
   description                       = "Site Policy (${var.site_settings.top_level_domain}-${var.deployment}))"
   origin_access_control_origin_type = "s3"
