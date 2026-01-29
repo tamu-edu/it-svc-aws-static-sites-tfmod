@@ -721,7 +721,9 @@ resource "aws_cloudfront_distribution" "site" {
   depends_on = [
     aws_acm_certificate_validation.cert,
     aws_s3_bucket_ownership_controls.bucket,
-    aws_s3_bucket_ownership_controls.bucket_logging
+    aws_s3_bucket_ownership_controls.bucket_logging,
+    (local.use_response_headers_default_policy == false ? aws_cloudfront_response_headers_policy.site : null),
+    (local.use_oac_default_policy == false ? aws_cloudfront_origin_access_control.site : null)
   ]
 }
 
