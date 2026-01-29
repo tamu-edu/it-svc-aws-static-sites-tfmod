@@ -1,5 +1,5 @@
 locals {
-  
+
   #domain = "${var.deployment}.${var.site_settings.route53_domain}"
   domain = "${var.site_settings.top_level_domain}.${var.deployment}.${var.route53_tld}"
   sans = distinct(concat(
@@ -45,7 +45,7 @@ resource "aws_route53_record" "site_val_record" {
   zone_id         = data.aws_route53_zone.subdomain.zone_id
 }
 
-resource "infoblox_cname_record" "aws_cert_cname_record_tamu"{
+resource "infoblox_cname_record" "aws_cert_cname_record_tamu" {
   for_each = {
     for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => {
       name   = dvo.resource_record_name
@@ -55,28 +55,28 @@ resource "infoblox_cname_record" "aws_cert_cname_record_tamu"{
     } if endswith(dvo.domain_name, "tamu.edu") && !endswith(dvo.domain_name, ".cloud.tamu.edu") && local.use_infoblox
   }
 
-  canonical	= trim(each.value.record, ".")
-  alias 		= trim(each.value.name, ".")
-  ttl 			= 3600
-	dns_view	= "TAMU"
-  comment 	= "Certificate validation record for AWS static site ${var.site_settings.top_level_domain}"
+  canonical = trim(each.value.record, ".")
+  alias     = trim(each.value.name, ".")
+  ttl       = 3600
+  dns_view  = "TAMU"
+  comment   = "Certificate validation record for AWS static site ${var.site_settings.top_level_domain}"
 }
 
-resource "infoblox_cname_record" "aws_cert_cname_record_internet"{
+resource "infoblox_cname_record" "aws_cert_cname_record_internet" {
   for_each = {
     for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
-    #} if length(regexall("${var.site_settings.top_level_domain}$", dvo.domain_name)) > 0
+      #} if length(regexall("${var.site_settings.top_level_domain}$", dvo.domain_name)) > 0
     } if endswith(dvo.domain_name, "tamu.edu") && !endswith(dvo.domain_name, ".cloud.tamu.edu") && local.use_infoblox
   }
 
-  canonical	= trim(each.value.record, ".")
-  alias 		= trim(each.value.name, ".")
-  ttl 			= 3600
-	dns_view	= "Internet"
-  comment 	= "Certificate validation record for AWS static site ${var.site_settings.top_level_domain}"
+  canonical = trim(each.value.record, ".")
+  alias     = trim(each.value.name, ".")
+  ttl       = 3600
+  dns_view  = "Internet"
+  comment   = "Certificate validation record for AWS static site ${var.site_settings.top_level_domain}"
 }
 
 # Validate certs. This will fail on a non-route53 domain
