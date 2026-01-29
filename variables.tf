@@ -81,6 +81,12 @@ variable "error_response_404_path" {
   default     = "/error/404.html"
 }
 
+variable "external_validation_list" {
+  type        = list(string)
+  default     = []
+  description = "A list of SANs that will need validation records created outside of this module. Note: these values must be created in the external DNS system while this module is being applied, or the validation and issuance process will time out."
+}
+
 # This was moved to lambda.tf so that localstack could use that file independently
 #variable "enable_hostname_rewrites" {
 #  type        = bool
