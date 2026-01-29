@@ -79,6 +79,47 @@ resource "infoblox_cname_record" "aws_cert_cname_record_internet" {
   comment   = "Certificate validation record for AWS static site ${var.site_settings.top_level_domain}"
 }
 
+
+# Print external DNS records to screen for manual operator creation
+
+locals {
+  manual_dvos = { for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => {
+    name   = dvo.resource_record_name
+    record = dvo.resource_record_value
+    type   = dvo.resource_record_type
+    } if contains(var.external_validation_list, dvo.domain_name)
+  }
+  records_output = join("\n", [for domain, dvo in local.manual_dvos : <<-EOT
+    Create the following DNS Record (for ${domain}):
+    Type:  ${dvo.type}
+    Name:  ${dvo.name}
+    Value: ${dvo.record}
+    ------------------------------------------------------------------------
+    EOT
+  ])
+}
+
+resource "terraform_data" "external_dns_instructions" {
+  # This triggers the resource to run every time the cert changes
+  input = aws_acm_certificate.cert.arn
+
+  # Echo the values to stdout using local-exec
+  provisioner "local-exec" {
+    command = <<EOT
+      cat <<'EOF'
+
+
+------------------------------------------------------------------------
+MANUAL DNS RECORDS REQUIRED FOR CERTIFICATE VALIDATION
+Certificate validation will not succeed until these records are created.
+------------------------------------------------------------------------
+${local.records_output}
+
+EOF
+    EOT
+  }
+}
+
 # Validate certs. This will fail on a non-route53 domain
 resource "aws_acm_certificate_validation" "cert" {
   certificate_arn         = aws_acm_certificate.cert.arn
