@@ -23,6 +23,7 @@ module "aws_static_site" {
     route53_name          = "blake-website-test"
     additional_domains    = []
     additional_certs      = []
+    external_domains      = []
     sso_required          = true
     sso_pages             = [
       "^/testing.*"
@@ -39,6 +40,7 @@ The `site_settings` line take a dictionary of variable overrides and includes th
 |additional_certs|[]|Additional SANs to add to the generated cert|
 |additional_cloudfront_aliases|[]|Additional aliases that will be added to CloudFront without being added as cert SANs|
 |additional_domains|[]|Additional domains that will be added as aliases and cert SANs|
+|external_domains|[]|External domains that skip automatic validation. Manual DNS records must be created for these domains.|
 |css_ttl|2592000|The number of seconds to cache CSS content|
 |def_html_ttl|1801|The number of seconds to cache HTML content|
 |default_ttl|60|Default number of seconds to cache content|
