@@ -16,7 +16,7 @@ locals {
   #  try(var.site_settings.cors_allowed_origins, null) != null
   #)
   use_response_headers_default_policy = false
-  response_headers_policy_id = local.use_response_headers_default_policy ? data.aws_cloudfront_response_headers_policy.site_default.id : aws_cloudfront_response_headers_policy.site[0].id
+  response_headers_policy_id          = local.use_response_headers_default_policy ? data.aws_cloudfront_response_headers_policy.site_default.id : aws_cloudfront_response_headers_policy.site[0].id
 
   use_oac_default_policy = false
 }
