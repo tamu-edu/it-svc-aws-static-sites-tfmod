@@ -6,7 +6,7 @@ locals {
     [local.domain],
     # This is for the top-level domain in production only
     var.site_settings.top_level_domain == "" || var.deployment != "prod" ? [] : [var.site_settings.top_level_domain],
-    var.site_settings.additional_domains == null ? tolist([]) : (var.deployment != "prod" ? tolist([]) : tolist(var.site_settings.additional_domains)),
+    var.site_settings.additional_domains == null ? tolist([]) : tolist(var.site_settings.additional_domains),
     # This is for the optional global accelerator
     try(var.site_settings.global_accelerator, "") == "" ? [] : flatten([var.site_settings.global_accelerator]),
     try(var.site_settings.additional_certs, var.additional_certs)
