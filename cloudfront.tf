@@ -3,6 +3,7 @@ locals {
     [local.domain],
     var.site_settings.top_level_domain == "" || var.deployment != "prod" ? [] : [var.site_settings.top_level_domain],
     var.site_settings.additional_domains == null ? tolist([]) : tolist(var.site_settings.additional_domains),
+    var.site_settings.external_domains == null ? tolist([]) : tolist(var.site_settings.external_domains),
     try(var.site_settings.additional_cloudfront_aliases, tolist([]))
   ))
 
