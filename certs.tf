@@ -103,7 +103,7 @@ locals {
 resource "terraform_data" "external_dns_instructions" {
   # This triggers the resource to run every time the cert changes
   input            = aws_acm_certificate.cert.arn
-  triggers_replace = aws_acm_certificate.cert.arn
+  triggers_replace = [aws_acm_certificate.cert.arn]
 
   # Echo the values to stdout using local-exec
   provisioner "local-exec" {
