@@ -52,7 +52,7 @@ resource "infoblox_cname_record" "aws_cert_cname_record_tamu" {
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
       #} if length(regexall("${var.site_settings.top_level_domain}$", dvo.domain_name)) > 0
-    } if endswith(dvo.domain_name, "tamu.edu") && !endswith(dvo.domain_name, ".cloud.tamu.edu") && !contains(var.external_validation_list, dvo.domain_name) && local.use_infoblox
+    } if endswith(dvo.domain_name, "tamu.edu") && !endswith(dvo.domain_name, ".cloud.tamu.edu") && !contains(var.site_settings.external_domains, dvo.domain_name) && local.use_infoblox
   }
 
   canonical = trim(each.value.record, ".")
@@ -69,7 +69,7 @@ resource "infoblox_cname_record" "aws_cert_cname_record_internet" {
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
       #} if length(regexall("${var.site_settings.top_level_domain}$", dvo.domain_name)) > 0
-    } if endswith(dvo.domain_name, "tamu.edu") && !endswith(dvo.domain_name, ".cloud.tamu.edu") && local.use_infoblox
+    } if endswith(dvo.domain_name, "tamu.edu") && !endswith(dvo.domain_name, ".cloud.tamu.edu") && !contains(var.site_settings.external_domains, dvo.domain_name) && local.use_infoblox
   }
 
   canonical = trim(each.value.record, ".")
@@ -87,7 +87,7 @@ locals {
     name   = dvo.resource_record_name
     record = dvo.resource_record_value
     type   = dvo.resource_record_type
-    } if contains(var.external_validation_list, dvo.domain_name)
+    } if contains(var.site_settings.external_domains, dvo.domain_name)
   }
   records_output = join("\n", [for domain, dvo in local.manual_dvos : <<-EOT
     Create the following DNS Record (for ${domain}):
