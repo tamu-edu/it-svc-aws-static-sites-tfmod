@@ -47,6 +47,7 @@ The `site_settings` line take a dictionary of variable overrides and includes th
 |html_ttl|1876|The number of seconds to cache .html files (except for index.html)|
 |index_ttl|60|The number of seconds to cache index.html content|
 |javascript_ttl|2592000|The number of seconds to cache JavaScript content|
+|json_ttl|60|The number of seconds to cache JSON content|
 |log_expiration|365|The number of days to retain logs|
 |max_ttl|259200|Maximum number of seconds to cache content|
 |media_ttl|86400|The number of seconds to cache media content|

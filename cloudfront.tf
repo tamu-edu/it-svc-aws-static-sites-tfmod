@@ -707,6 +707,63 @@ resource "aws_cloudfront_distribution" "site" {
     viewer_protocol_policy = "redirect-to-https"
   }
 
+  ordered_cache_behavior {
+    path_pattern               = "*.json"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = aws_s3_bucket.bucket.id
+    response_headers_policy_id = local.response_headers_policy_id
+
+    forwarded_values {
+      query_string = false
+
+      cookies {
+        forward = "none"
+      }
+
+      headers = local.enable_hostname_header_caching ? ["X-Forwarded-Host"] : null
+    }
+
+    lambda_function_association {
+      event_type   = "origin-request"
+      lambda_arn   = aws_lambda_function.edge_rewrite.qualified_arn
+      include_body = false
+    }
+
+    #lambda_function_association {
+    #  event_type   = "origin-response"
+    #  lambda_arn   = aws_lambda_function.edge_security.qualified_arn
+    #  include_body = false
+    #}
+
+    # Not compatible with host headers (i.e. an external redirect site config)
+    dynamic "lambda_function_association" {
+      for_each = local.enable_hostname_rewrites ? toset([]) : (local.sso_required ? toset([0]) : toset([]))
+
+      content {
+        event_type   = "viewer-request"
+        lambda_arn   = aws_lambda_function.oidc_auth[0].qualified_arn
+        include_body = false
+      }
+    }
+
+    dynamic "lambda_function_association" {
+      for_each = local.enable_hostname_rewrites ? toset([0]) : toset([])
+
+      content {
+        event_type   = "viewer-request"
+        lambda_arn   = aws_lambda_function.edge_host_header[0].qualified_arn
+        include_body = false
+      }
+    }
+
+    min_ttl                = try(var.site_settings.json_ttl, var.json_ttl)
+    default_ttl            = try(var.site_settings.json_ttl, var.json_ttl)
+    max_ttl                = try(var.site_settings.json_ttl, var.json_ttl)
+    compress               = true
+    viewer_protocol_policy = "redirect-to-https"
+  }
+
   logging_config {
     include_cookies = false
     bucket          = aws_s3_bucket.bucket_logging.bucket_domain_name
