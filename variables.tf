@@ -112,6 +112,12 @@ variable "javascript_ttl" {
   default     = 2592000
 }
 
+variable "json_ttl" {
+  type        = number
+  description = "The number of seconds to cache JSON content"
+  default     = 60
+}
+
 # This was moved to lambda.tf so that localstack could use that file independently
 #variable "lambda_runtime" {
 #  type        = number
